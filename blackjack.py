@@ -57,12 +57,18 @@ class Player:
     def __str__(self):
         return "{} has ".format(self.player_id) + str(self.hand)
 
+    def show_hand(self):
+        return ' '.join([str(card) for card in self.hand.cards])
+
 
 class Dealer(Player):
 
     def __init__(self):
         self.player_id = "Dealer"
         self.hand = Hand()
+
+    def show_hand(self):
+        return 'X ' + ' '.join([str(card) for card in self.hand.cards[1:]])
 
 
 class Game:
@@ -80,6 +86,13 @@ class Game:
 
     def get_hand_value(self, hand):
         total = 0
+        has_ace = False
         for card in hand:
             total += self.VALUES[card.get_rank()]
+            if self.VALUES[card.get_rank()] == 'A':
+                has_ace = True
+
+        if has_ace and total < 12:
+            total += 10
+
         return total
