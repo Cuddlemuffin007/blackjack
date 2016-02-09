@@ -39,10 +39,47 @@ class Deck:
 class Hand:
 
     def __init__(self):
-        self.hand = []
+        self.cards = []
 
     def __str__(self):
-        return "Hand contains: " + ' '.join([str(card) for card in self.hand])
+        return "hand containing: " + ' '.join([str(card) for card in self.cards])
 
     def add_card(self, card):
-        self.hand.append(card)
+        self.cards.append(card)
+
+
+class Player:
+
+    def __init__(self):
+        self.player_id = "Player"
+        self.hand = Hand()
+
+    def __str__(self):
+        return "{} has ".format(self.player_id) + str(self.hand)
+
+
+class Dealer(Player):
+
+    def __init__(self):
+        self.player_id = "Dealer"
+        self.hand = Hand()
+
+
+class Game:
+
+    VALUES = {
+            'A': 1, '2': 2, '3': 3, '4': 4, '5': 5,
+            '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 10, 'Q': 10, 'K': 10
+            }
+
+    def __init__(self):
+        self.deck = Deck()
+        self.player = Player()
+        self.dealer = Dealer()
+
+    def get_hand_value(self, hand):
+        total = 0
+        for card in hand:
+            total += self.VALUES[card.get_rank()]
+        return total
