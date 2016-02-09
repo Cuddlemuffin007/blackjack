@@ -27,10 +27,7 @@ class Deck:
         self.deck = [Card(suit, rank) for suit in Card.SUITS for rank in Card.RANKS]
 
     def __str__(self):
-        deck = ""
-        for card in self.deck:
-            deck += (str(card) + " ")
-        return "Deck contains: " + deck
+        return "Deck contains: " + ' '.join([str(card) for card in self.deck])
 
     def shuffle(self):
         return random.shuffle(self.deck)
@@ -45,10 +42,7 @@ class Hand:
         self.hand = []
 
     def __str__(self):
-        hand = ""
-        for card in self.hand:
-            hand += (str(card) + " ")
-        return "Hand contains: " + hand
+        return "Hand contains: " + ' '.join([str(card) for card in self.hand])
 
     def add_card(self, card):
         self.hand.append(card)
