@@ -1,4 +1,5 @@
 # tiy blackjack oop project
+from sys import exit
 import random
 
 
@@ -58,7 +59,7 @@ class Player:
         return "{} has ".format(self.player_id) + str(self.hand)
 
     def show_hand(self):
-        return ' '.join([str(card) for card in self.hand.cards])
+        return "{} has: ".format(self.player_id) + ' '.join([str(card) for card in self.hand.cards])
 
 
 class Dealer(Player):
@@ -68,7 +69,7 @@ class Dealer(Player):
         self.hand = Hand()
 
     def show_hand(self):
-        return 'X ' + ' '.join([str(card) for card in self.hand.cards[1:]])
+        return "{} shows: ".format(self.player_id) + 'X ' + ' '.join([str(card) for card in self.hand.cards[1:]])
 
 
 class Game:
@@ -83,16 +84,95 @@ class Game:
         self.deck = Deck()
         self.player = Player()
         self.dealer = Dealer()
+        self.player_bust = False
+        self.dealer_bust = False
 
     def get_hand_value(self, hand):
         total = 0
         has_ace = False
         for card in hand:
             total += self.VALUES[card.get_rank()]
-            if self.VALUES[card.get_rank()] == 'A':
+            if card.get_rank() == 'A':
                 has_ace = True
 
         if has_ace and total < 12:
             total += 10
 
         return total
+
+    def player_turn(self):
+        prompt = "{} ({}). You can (h)it or (s)tand.\n>> "
+
+        print("{}".format(self.dealer.show_hand()))
+
+        if self.get_hand_value(self.player.hand.cards) == 21:
+            print('Blackjack! You win!', self.player.hand)
+            return True
+
+        while True:
+            choice = input(prompt.format(self.player.show_hand(), self.get_hand_value(self.player.hand.cards))).lower()
+            if choice == 'h':
+                self.player.hand.add_card(self.deck.deal_card())
+                print(self.player.show_hand())
+                if self.get_hand_value(self.player.hand.cards) > 21:
+                    self.player_bust = True
+                    return True
+            elif choice == 's':
+                print("You stand on {}".format(self.get_hand_value(self.player.hand.cards)))
+                return False
+
+    def dealer_turn(self):
+
+        if self.get_hand_value(self.dealer.hand.cards) == 21:
+            return True
+
+        while True:
+            if self.get_hand_value(self.dealer.hand.cards) >= 17:
+                return True
+            while self.get_hand_value(self.dealer.hand.cards) < 17:
+                self.dealer.hand.add_card(self.deck.deal_card())
+                if self.get_hand_value(self.dealer.hand.cards) > 21:
+                    self.dealer_bust = True
+                    return True
+
+    def play_again(self):
+
+        play = input("Deal again?\n>> ").lower()
+        if play == 'y':
+            new_game = Game()
+            new_game.deal()
+        elif play == 'n':
+            print("See you later!")
+            exit(0)
+
+    def deal(self):
+        hand_over = False
+
+        self.deck.shuffle()
+        self.player.hand.add_card(self.deck.deal_card())
+        self.dealer.hand.add_card(self.deck.deal_card())
+        self.player.hand.add_card(self.deck.deal_card())
+        self.dealer.hand.add_card(self.deck.deal_card())
+
+        hand_over = self.player_turn()
+        if not hand_over:
+            self.dealer_turn()
+
+        form = (self.player.show_hand(), str(self.dealer))
+
+        if self.player_bust:
+            print("{}\n{}\nPlayer bust! You lose!".format(form[0], form[1]))
+        elif self.dealer_bust:
+            print("{}\n{}\nDealer bust! You win!".format(form[0], form[1]))
+        elif self.get_hand_value(self.player.hand.cards) == self.get_hand_value(self.dealer.hand.cards):
+            print("{}\n{}\nIt's a draw! You still lose though...".format(form[0], form[1]))
+        elif self.get_hand_value(self.player.hand.cards) > self.get_hand_value(self.dealer.hand.cards):
+            print("{}\n{}\nYou win!".format(form[0], form[1]))
+        else:
+            print("{}\n{}\nYou lose!".format(form[0], form[1]))
+
+        self.play_again()
+
+
+game = Game()
+game.deal()
